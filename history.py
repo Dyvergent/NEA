@@ -166,7 +166,7 @@ def main():
             try:
                 int(data[i][1])
             except:
-                continue #ignore invalid or missing rows bhello
+                continue #ignore invalid or missing rows
             new_rect = pygame.rect.Rect(left,top+(120*i),500,100)
             new_border = pygame.rect.Rect(left-2,top+(120*i)-2,504,104)
             pygame.draw.rect(screen,WHITE,new_border)
