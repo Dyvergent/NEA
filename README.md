@@ -19,6 +19,11 @@ The project focuses on:
 
 ---
 
+## Downloading
+
+To download the entire project, navigate to [here](https://github.com/Dyvergent/NEA/releases) and click on Source code (zip) {alternatively, Source code (tar.gz) if you are on Linux}. 
+
+---
 ## Features
 
 ### Gameplay
