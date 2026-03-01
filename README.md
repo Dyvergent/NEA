@@ -7,7 +7,7 @@ The project implements a playable n×n sliding tile puzzle with persistent stati
 
 ## Overview
 
-This application recreates the classic sliding puzzle (sometimes known as a picture puzzle or 8-puzzle or 15-puzzle), where the player rearranges shuffled numbered tiles into the correct order by sliding them into an empty space to re-order the numbers (or alternatively, re-form the original image).
+This game recreates the classic sliding puzzle (sometimes known as a picture puzzle or 8-puzzle or 15-puzzle), where the player rearranges shuffled numbered tiles into the correct order by sliding them into an empty space to re-order the numbers (or alternatively, re-form the original image).
 
 The project focuses on:
 
