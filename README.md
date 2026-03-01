@@ -1,6 +1,6 @@
-# Sliding Puzzle Game (NEA Project)
+# Fragmentum - Sliding Puzzle Game (NEA Project)
 
-A semi-fully-featured **Sliding Puzzle Game** developed using **Python** and **Pygame** as part of an A-Level Computer Science NEA (Non-Exam Assessment).
+Fragmentum is a semi-fully-featured **Sliding Puzzle Game** developed using **Python** and **Pygame** as part of an A-Level Computer Science NEA (Non-Exam Assessment).
 The project implements a playable n×n sliding tile puzzle with persistent statistics, save/load functionality, a leaderboard system, and a built-in puzzle solver visualiser, packed with tutorials & explanations for each of these sections.
 
 ---
