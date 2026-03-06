@@ -16,6 +16,7 @@ def main():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Main Menu")
     clock = pygame.time.Clock()
+    #main font
     big_font = pygame.font.Font("PlayfairDisplay-VariableFont_wght.ttf",150)
     #theme colours
     all_colours = config.get_all_colours()
