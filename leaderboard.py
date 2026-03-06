@@ -22,6 +22,7 @@ def main():
     box_colour = all_colours[7]
     NAVY = all_colours[10]
     RED = all_colours[11]
+    #reference offset values for rects
     left_1,top_1 = 80,65
     left_2 = 700
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -40,7 +41,7 @@ def main():
             x[0] = float(x[0])  #convert time from string to float for easier formatting in the UI
         except:
             pass
-        data[i] = tuple(x)  # store back as a tuple for later indexing
+        data[i] = tuple(x)  #store back as a tuple for later indexing
     def format_time(seconds):
         #convert seconds to H:MM:SS.sss format
         if seconds == "None": return "None"
@@ -49,10 +50,13 @@ def main():
         minutes = int((seconds % 3600) // 60)
         secs = seconds % 60
         if hours > 0:
+            #hours minutes and seconds
             return f"{hours:d}:{minutes:02d}:{secs:06.3f}"
         elif minutes > 0:
+            #minutes and seconds
             return f"{minutes:02d}:{secs:06.3f}"
         else:
+            #only seconds
             return f"{secs:06.3f}"
     back_button = Button(70,70,150,50,"Back",BROWN,border_radius=4)
     fastest_text = font.render("Fastest Times (Personal):",True,WHITE)
@@ -60,11 +64,14 @@ def main():
     while running:
         pygame.display.flip()
         for event in pygame.event.get():
+            #main event handling
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if back_button.handle_click(pygame.mouse.get_pos()):
-                    running = False
+                #handle ONLY left click
+                if event.button==1:
+                    if back_button.handle_click(pygame.mouse.get_pos()):
+                        running = False
         screen.fill(background)
         pygame.draw.rect(screen, WHITE, border)
         pygame.draw.rect(screen, box_colour, rect)
@@ -84,7 +91,7 @@ def main():
             screen.blit(size_text,(left_1+105,top_1+(120*(i+1))+15))
             screen.blit(time_text,(left_1+105,top_1+(120*(i+1))+50))    
         #right column: example solved boards for even sizes 4,6,8,10 and their times
-        #data is ordered by board size; even sizes are located at indices 1,3,5,7 -> accessed as 1+2*i
+        #data is ordered by board size, even sizes are located at indices 1,3,5,7 -> accessed as 1+2*i
         for i in range(4):
             new_rect = pygame.rect.Rect(left_2,top_1+(120*(i+1)),500,100)
             new_border = pygame.rect.Rect(left_2-2,top_1+(120*(i+1))-2,504,104)

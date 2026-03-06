@@ -5,6 +5,7 @@ from pathlib import Path
 import itertools
 
 class Node:
+    #necessary class for solver later
     def __init__(self, board, blank, parent):
         self.board = board
         self.blank = blank
@@ -25,24 +26,29 @@ class Board:
         arr = []
         total = 0
         index = 0
+        #first create board without blank tile & store blank tile row
         for x in self.board:
             for k in x:
                 if k != 0:
                     arr.append(k)
                 else:
                     index = len(self.board) - self.board.index(x)
+        #iterate through the board and count number of inversions
         for i in range(len(arr)):
             for j in range(i+1, len(arr)):
                 if arr[i] > arr[j]:
                     total += 1
         if self.n % 2 == 0:
+            #even size boards are solvable ONLY if inversions + row of blank tile is odd
             return (total + index) % 2 == 1
         else:
+            #odd size boards are solvable ONLY if inversions are even
             return total % 2 == 0
 
     def generate_heuristics(self):
         dist = 0
         board_flat = []
+        #flatten board
         for x in self.board:
             board_flat += x
         #standard Manhattan distance
@@ -84,6 +90,7 @@ class Board:
         while True:
             temp_board = list(range(0, self.n**2))
             random.shuffle(temp_board)
+            #split board into chunks of size n, n times
             chunks_size = self.n
             temp2_board = [temp_board[i:i + chunks_size] for i in range(0, len(temp_board), chunks_size)]
             self.board = temp2_board
@@ -95,23 +102,28 @@ class Board:
         self.create_tiles()  #create Tile objects using those images
 
     def generate_solved(self):
+        #manually generate a solved board
         temp_board = list(range(1,self.n**2))+[0]
+        #split board into chunks of size n, n times
         chunks_size = self.n
         solved_board = [temp_board[i:i + chunks_size] for i in range(0, len(temp_board), chunks_size)]
         self.board = solved_board
-        self.split_image()
-        self.create_tiles()
+        self.split_image()   #split image into tile_images
+        self.create_tiles()  #create Tile objects using those images
 
     def generate_board(self,board):
         self.board = board
-        self.split_image()
-        self.create_tiles()
+        self.split_image()   #split image into tile_images
+        self.create_tiles()  #create Tile objects using those images
         
     def choose_image(self):
+        #backtrack to parent folder and load all_tiles
         base_path = Path(__file__).parent.parent / "all_tiles"
+        #load and read from ind.txr
         with open("ind.txt","r") as file:
             data = file.readlines()
         index = int(data[0])
+        #load relative image depending on index value
         match index:
             case 1:
                 image = pygame.image.load(base_path/"tiles1.png")
@@ -121,24 +133,28 @@ class Board:
                 image = pygame.image.load(base_path/"tiles3.png")
             case 4:
                 image = pygame.image.load(base_path/"tiles4.png")
-            case _:
+            case _: #default case (safer in case it fails, default to default image)
                 image = pygame.image.load(base_path/"tiles.png")
+        #rescale image & return it
         image = pygame.transform.smoothscale(image,(self.width,self.width))
         return image
     
     def split_image(self):
+        #split image into its smaller tiles
         image = self.choose_image()
         img_width, img_height = image.get_size()
         tile_width = img_width // self.n
         tile_height = img_height // self.n
         self.tile_width = tile_width
         self.tile_images = []
-
+        #append to self.tile_images
         for row in range(self.n):
             for col in range(self.n):
                 if row == self.n - 1 and col == self.n - 1:  #blank tile
+                    #skip the blank tile
                     self.tile_images.append(None)
                     continue
+                #generate and append sub image
                 rect = pygame.Rect(col * tile_width, row * tile_height, tile_width, tile_height)
                 tile = image.subsurface(rect).copy()
                 self.tile_images.append(tile)
@@ -158,13 +174,15 @@ class Board:
             self.tiles.append(row_tiles)
 
     def find_blank_position(self):
+        #iterate through the board
         for i in range(self.n):
-            for j in range(self.n): #iterate through the board
+            for j in range(self.n):
                 if self.board[i][j] == 0: #if that location is the blank tile, return its location as a tuple
                     return (i, j)
         return None
 
     def find_tile(self,tile):
+        #same logic as above, but any tile
         for i in range(self.n):
             for j in range(self.n):
                 if self.board[i][j] == tile:
@@ -231,6 +249,7 @@ class Board:
         #find blank tile
         blank_row,blank_col = self.find_blank_position()
         #check for the WASD keys or arrow keys (since they should perform the same thing)
+        #once key has been found, swap it with the blank tile
         if key == pygame.K_w or key == pygame.K_UP:
             #check if the move to be made is within the bounds of the board (this prevents the blank tile wrapping around the board)
             if 0 <= blank_row-1 < self.n and 0 <= blank_col < self.n:
@@ -252,6 +271,7 @@ class Board:
         return current_state == self.goal
 
     def board_to_tuple(self):
+        #js converts board to tuple
         return tuple(tuple(row) for row in self.board)
 
     def reconstruct_moves(self,node):
@@ -265,9 +285,12 @@ class Board:
             moved_tile = node.parent.board.board[cx][cy]
             moves.append(moved_tile)
             node = node.parent
+        #reverse the moves and nodes before returning as we started from the solved state to the first board state
+        #so by reversing it we get from the starting position to the solved board
         return moves[::-1],nodes[::-1]
 
     def pop_best(self,pq):
+        #finds the lowest heuristic board and returns it
         best_cost = float("inf")
         best_index = -1
         for i, (cost, _, _) in enumerate(pq):
@@ -345,6 +368,7 @@ class Board:
                 tile.draw(screen, font, x + (j * self.tile_width), y + (i * self.tile_width))
         
 class Tile:
+    #each individual tile of the board
     def __init__(self, value, row, col, size, image=None):
         self.val = value
         self.row = row
@@ -380,6 +404,7 @@ class Button:
         self.opacity = opacity
         self.border_radius = border_radius
     def create_button(self, screen, font_size, font_colour, code=0):
+        #code determines which font we use, mainly used for main menu screen
         if code == 1:
             font = pygame.font.Font("PlayfairDisplay-VariableFont_wght.ttf", font_size)
         else:
@@ -404,6 +429,7 @@ class Button:
 
         
     def handle_click(self,mouse_pos):
+        #if the mouse position is within the bounds of the button, return True
         mx,my = mouse_pos
         if (self.coord[0] <= mx <= self.coord[0]+self.width) and (self.coord[1] <= my <= self.coord[1]+self.height):
             return True
@@ -549,6 +575,7 @@ class Database:
             self.lastrowid = cursor.lastrowid
         else:
             with sqlite3.connect("leaderboard.db") as connection:
+                #same logic applies as above just for leaderboard database
                 cursor = connection.cursor()
                 if time == "00.000": time = "None"
                 cursor.execute(
@@ -557,30 +584,34 @@ class Database:
             self.lastrowid = cursor.lastrowid
             
     def reduce_to_5(self):
-        if self.name == "History":
-            with sqlite3.connect(f"history.db") as connection:
-                cursor = connection.cursor()
-                cursor.execute("SELECT COUNT(*) FROM History")
-                row_count = cursor.fetchone()[0]
-                #keep only the most recent 5 history records by deleting oldest entries
-                while row_count > 5:
-                    cursor.execute(
-                    "DELETE FROM History WHERE ID IN (SELECT ID FROM History ORDER BY ID ASC LIMIT ?)",(row_count - 5,)
-                    )
-                    row_count -= 1
-                connection.commit()
+        #we only use this for history database
+        with sqlite3.connect(f"history.db") as connection:
+            cursor = connection.cursor()
+            cursor.execute("SELECT COUNT(*) FROM History")
+            row_count = cursor.fetchone()[0]
+            #keep only the most recent 5 history records by deleting oldest entries
+            while row_count > 5:
+                cursor.execute(
+                "DELETE FROM History WHERE ID IN (SELECT ID FROM History ORDER BY ID ASC LIMIT ?)",(row_count - 5,)
+                )
+                row_count -= 1
+            connection.commit()
 
     def update_record(self, record_id, board_scramble, board_size, time, moves, solved=False,date=None):
+        #converts data to format understandable by SQL
         solved = 1 if solved else 0
         board_scramble = str(board_scramble)
         if self.name == "History":
             with sqlite3.connect("history.db") as connection:
                 cursor = connection.cursor()
                 try:
+                    #try to find the corresponding row id
                     data = self.fetch_data()
                     row_id = data[record_id-1][0]
                 except:
+                    #if this fails, assume the record_id is already correct
                     row_id = record_id
+                #update corresponding record & commit
                 cursor.execute(
                     """
                     UPDATE History
@@ -595,10 +626,11 @@ class Database:
                     (board_scramble, board_size, round(time,3), moves, solved, date, row_id)
                 )
                 connection.commit()
-        elif self.db_name == "leaderboard.db":
+        elif self.name == "Leaderboard":
             with sqlite3.connect("leaderboard.db") as connection:
                 cursor = connection.cursor()
                 if time == "00.000": time = "None"
+                #not much to check here, just update record & commit
                 cursor.execute(
                     """
                     UPDATE Leaderboard
@@ -637,7 +669,7 @@ class Database:
 
     def clear_db(self):
         if self.name == "History":
-            #for history, just drop the table
+            #for history, just drop the table, we recreate it automatically anyway
             with sqlite3.connect("history.db") as connection:
                 cursor = connection.cursor()
                 cursor.execute("DROP TABLE History")
@@ -655,10 +687,5 @@ class Database:
             
 
 if __name__ == "__main__":
-    a = Board(5)
-    a.generate_solvable()
-    for row in a.board:
-        print(row)
-    print(a.goal_positions)
-    print(a.generate_heuristics())
+    pass
 

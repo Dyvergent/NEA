@@ -9,7 +9,7 @@ def main():
     WIDTH = 1280
     HEIGHT = 720
     FPS = 60
-    # setting the theme colours
+    #theme colours
     all_colours = config.get_all_colours()
     text_BLACK = (0,0,0)
     text_WHITE = (255,255,255)
@@ -24,7 +24,7 @@ def main():
     box_colour = all_colours[7]
     NAVY = all_colours[10]
     RED = all_colours[11]
-    n_slider = Slider(WIDTH//2-400,500,2,10,start_val=3)
+    #buttons creation
     back_button = Button(70,70,150,50,"Back",BROWN,border_radius=4)
     next_button = Button(WIDTH//2+250,560,60,50,"Next",GREY,border_radius=4)
     prev_button = Button(WIDTH//2-300,560,60,50,"Previous",GREY,border_radius=4)
@@ -36,6 +36,7 @@ def main():
     moves,nodes = board.solve_puzzle()
     #skip the first move since it's just the starting position twice (lazy fix)
     moves,nodes = moves[1:],nodes[1:]
+    #background rects
     rect = pygame.rect.Rect(60,60,1160,600)
     border = pygame.rect.Rect(59,59,1162,602)
     font = pygame.font.Font("CrimsonPro-VariableFont_wght.ttf",36)
@@ -56,24 +57,30 @@ def main():
         pygame.display.update()
         events = pygame.event.get()
         for event in events:
+            #main event handling
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if back_button.handle_click(pygame.mouse.get_pos()):
-                    running = False
-                if next_button.handle_click(pygame.mouse.get_pos()):
-                    ind += 1
-                    if ind > len(moves)-1: ind = len(moves)-1
-                if prev_button.handle_click(pygame.mouse.get_pos()):
-                    ind -= 1
-                    if ind < -1: ind = -1
+                #handle ONLY left click
+                if event.button==1:
+                    if back_button.handle_click(pygame.mouse.get_pos()):
+                        running = False
+                    #displaying the next or previous move by incrementing or decrementing the current move index
+                    if next_button.handle_click(pygame.mouse.get_pos()):
+                        ind += 1
+                        if ind > len(moves)-1: ind = len(moves)-1
+                    if prev_button.handle_click(pygame.mouse.get_pos()):
+                        ind -= 1
+                        if ind < -1: ind = -1
         screen.fill(background)
+        #drawing text and buttons
         pygame.draw.rect(screen, WHITE, border)
         pygame.draw.rect(screen, box_colour, rect)
         back_button.create_button(screen,20,WHITE)
         prev_button.create_button(screen,15,WHITE)
         next_button.create_button(screen,15,WHITE)
         draw_text(f"Move {ind+1}/{len(moves)}",font,WHITE,screen,WIDTH//2,580)
+        #board visualisation
         if ind != -1:
             temp_board = nodes[ind]
             temp_board.width = 400

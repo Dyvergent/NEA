@@ -7,6 +7,7 @@ def main():
     WIDTH = 1280
     HEIGHT = 720
     FPS = 60
+    #no need for theme colours here, just static values used here
     BLACK = (0, 0, 0)
     WHITE = (255, 255, 255)
     BROWN = (150, 75, 0)
@@ -17,12 +18,13 @@ def main():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Tutorial")
     clock = pygame.time.Clock()
-    rect = pygame.rect.Rect(60,60,1160,600)
-    border = pygame.rect.Rect(59,59,1162,602)
+    #fonts
     font = pygame.font.Font("CrimsonPro-VariableFont_wght.ttf",36)
     smalltext = pygame.font.Font("CrimsonPro-VariableFont_wght.ttf",20)
     running = True
+    #backtracking and summoning the relevant folder
     base_path = Path(__file__).parent / "main_game_images"
+    #loading each image in the path
     img_arr = {
         0:pygame.image.load(base_path / "tutorial0.png"),
         1:pygame.image.load(base_path / "tutorial1.png"),
@@ -33,16 +35,21 @@ def main():
         }
     current_screen = 0
     surf_x, surf_y = WIDTH - 150, HEIGHT // 2
+    #button creation
     next_button = Button(surf_x, surf_y, 100, 50, "Next", GREY, opacity=150, border_radius=8)
     prev_button = Button(50, surf_y, 100, 50, "Previous", GREY, opacity=150, border_radius=8)
     main_button = Button(surf_x, 60, 100, 50, "Back to Hub", BROWN, opacity=150, border_radius=8)
     while running:
         pygame.display.flip()
         for event in pygame.event.get():
+            #main event handling
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
+                #handle ONLY left click
+                if event.button==1:
                     mouse_pos = pygame.mouse.get_pos()
+                    #navigate through tutorial screens by incrementing/decrementing current_screen index
                     if next_button.handle_click(mouse_pos):
                         current_screen += 1
                         if current_screen >= 5: current_screen = 5
@@ -52,6 +59,7 @@ def main():
                     elif main_button.handle_click(mouse_pos):
                         running = False
         screen.fill(background)
+        #draw image and buttons
         screen.blit(img_arr[current_screen],(0,0))
         next_button.create_button(screen, 20, WHITE)
         prev_button.create_button(screen, 20, WHITE)

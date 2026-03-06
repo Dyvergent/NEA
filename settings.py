@@ -49,6 +49,7 @@ def main():
         "average_time": "00.000",
         "fastest_solve": "00.000"
     }
+    #background rects
     rect = pygame.rect.Rect(60,60,1160,600)
     border = pygame.rect.Rect(59,59,1162,602)
     running = True
@@ -79,35 +80,44 @@ def main():
     while running:
         clock.tick(FPS)
         if show_confirm:
+            #call the confirmation screen
             reset_stats_button, cancel_button = confirmation_screen()
         pygame.display.flip()
         for event in pygame.event.get():
+            #main event handling
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if back_button.handle_click(pygame.mouse.get_pos()):
-                    running = False
-                for btn in buttons_dict.values():
-                    if btn.handle_click(pygame.mouse.get_pos()):
-                        with open("ind.txt","w") as file:
-                            for i,key in enumerate(buttons_dict.values()):
-                                if key == btn:
-                                    file.write(str(i))
-                        refresh_all_colours()
-                if show_confirm:
-                    if reset_stats_button.handle_click(pygame.mouse.get_pos()):
-                        history_db = Database("History","history.db")
-                        history_db.clear_db()
-                        with open("stats.json","w") as file:
-                            json.dump(stats_resetted,file)
-                        leaderboard_db = Database("Leaderboard","leaderboard.db")
-                        leaderboard_db.clear_db()
-                        show_confirm = False
-                    if cancel_button.handle_click(pygame.mouse.get_pos()):
-                        show_confirm = False
-                if reset_button.handle_click(pygame.mouse.get_pos()):
-                    show_confirm = True
+                #handle ONLY left click
+                if event.button==1:
+                    if back_button.handle_click(pygame.mouse.get_pos()):
+                        running = False
+                    for btn in buttons_dict.values():
+                        #handle event if one of the themes was pressed
+                        if btn.handle_click(pygame.mouse.get_pos()):
+                            #overwrite ind.txt
+                            with open("ind.txt","w") as file:
+                                for i,key in enumerate(buttons_dict.values()):
+                                    if key == btn:
+                                        file.write(str(i))
+                            refresh_all_colours()
+                    if show_confirm:
+                        #confirmation screen event handling
+                        if reset_stats_button.handle_click(pygame.mouse.get_pos()):
+                            history_db = Database("History","history.db")
+                            history_db.clear_db()
+                            with open("stats.json","w") as file:
+                                json.dump(stats_resetted,file)
+                            leaderboard_db = Database("Leaderboard","leaderboard.db")
+                            leaderboard_db.clear_db()
+                            show_confirm = False
+                        if cancel_button.handle_click(pygame.mouse.get_pos()):
+                            show_confirm = False
+                    if reset_button.handle_click(pygame.mouse.get_pos()):
+                        #show confirm if reset stats button is clicked
+                        show_confirm = True
         screen.fill(background)
+        #draw everything
         pygame.draw.rect(screen,WHITE,border)
         pygame.draw.rect(screen,box_colour,rect)
         screen.blit(theme_text,(180,130))

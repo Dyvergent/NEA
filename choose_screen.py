@@ -23,6 +23,7 @@ def main():
     box_colour = all_colours[7]
     NAVY = all_colours[10]
     RED = all_colours[11]
+    #instances of Slider & buttons created
     n_slider = Slider(WIDTH//2-400,500,2,10,start_val=3)
     confirm_button = Button(1060,600,150,50,"Confirm",GREEN,border_radius=4)
     back_button = Button(70,70,150,50,"Back",BROWN,border_radius=4)
@@ -30,7 +31,7 @@ def main():
     pygame.display.set_caption("Puzzle Selection")
     clock = pygame.time.Clock()
     running = True
-
+    #background rects & fonts
     rect = pygame.rect.Rect(60,60,1160,600)
     border = pygame.rect.Rect(59,59,1162,602)
     font = pygame.font.Font("CrimsonPro-VariableFont_wght.ttf",36)
@@ -47,25 +48,32 @@ def main():
         pygame.display.update()
         events = pygame.event.get()
         for event in events:
+            #main event handling
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if confirm_button.handle_click(pygame.mouse.get_pos()):
-                    main_game.n = n_slider.get_value()
-                    main_game.main()
-                elif back_button.handle_click(pygame.mouse.get_pos()):
-                    running = False
+                if event.button == 1:
+                    if confirm_button.handle_click(pygame.mouse.get_pos()):
+                        #if confirm button clicked, start the game
+                        main_game.n = n_slider.get_value()
+                        main_game.main()
+                    elif back_button.handle_click(pygame.mouse.get_pos()):
+                        running = False
             keys = pygame.key.get_pressed()
             if keys[K_RETURN]:
+                #same for if enter key pressed
                 main_game.n = n_slider.get_value()
                 main_game.main()
             else: pass
+            #handles event if the slider was clicked on or moved
             n_slider.handle_event(event)
+        #update slider if anything changed
         n_slider.update()
         screen.fill(background)
         pygame.draw.rect(screen, WHITE, border)
         pygame.draw.rect(screen, box_colour, rect)
         draw_text("Select the size of the board you wish to solve:",font,WHITE,screen,WIDTH//2,100)
+        #board visualisation & slider & button& text drawing
         solved_board = Board(n_slider.get_value(),300)
         solved_board.generate_solved()
         solved_board.draw_board(screen,WIDTH//2-(solved_board.width//2),150)

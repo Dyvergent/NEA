@@ -116,34 +116,41 @@ def main():
         clock.tick(FPS)
         pygame.display.set_caption("Main Menu")
         if show_confirm:
+            #call the confirmation screen
             quit_button, save_button, cancel_button = confirmation_screen()
         pygame.display.flip()
         for event in pygame.event.get():
+            #full event handling
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
-                if show_confirm:
-                    if quit_button.handle_click(mouse_pos):
-                        pygame.quit()
-                    elif cancel_button.handle_click(mouse_pos):
-                        show_confirm = False
-                else:
-                    if yellow_button.handle_click(mouse_pos) or point_in_triangle(mouse_pos,triangle):
-                        choose_screen.main()
-                    for btn in buttons.values():
-                        if btn.text == "Leaderboard" and btn.handle_click(mouse_pos):
-                            leaderboard.main()
-                        elif btn.text == "History" and btn.handle_click(mouse_pos):
-                            history.main()
-                        elif btn.text == "Tutorial" and btn.handle_click(mouse_pos):
-                            tutorial.main()
-                        elif btn.text == "Settings" and btn.handle_click(mouse_pos):
-                            settings.main()
-                            refresh_all_colours()
-                        elif btn.text == "Quit Game" and btn.handle_click(mouse_pos):
-                            show_confirm = True
+                #handle ONLY left click
+                if event.button == 1:
+                    mouse_pos = pygame.mouse.get_pos()
+                    if show_confirm:
+                        #confirmation screen button handling
+                        if quit_button.handle_click(mouse_pos):
+                            pygame.quit()
+                        elif cancel_button.handle_click(mouse_pos):
+                            show_confirm = False
+                    else:
+                        #main menu button handling
+                        if yellow_button.handle_click(mouse_pos) or point_in_triangle(mouse_pos,triangle):
+                            choose_screen.main()
+                        for btn in buttons.values():
+                            if btn.text == "Leaderboard" and btn.handle_click(mouse_pos):
+                                leaderboard.main()
+                            elif btn.text == "History" and btn.handle_click(mouse_pos):
+                                history.main()
+                            elif btn.text == "Tutorial" and btn.handle_click(mouse_pos):
+                                tutorial.main()
+                            elif btn.text == "Settings" and btn.handle_click(mouse_pos):
+                                settings.main()
+                                refresh_all_colours()
+                            elif btn.text == "Quit Game" and btn.handle_click(mouse_pos):
+                                show_confirm = True
         screen.fill(background)
+        #draw the buttons & text
         for btn in buttons.values():
             btn.create_button(screen,25,text_BLACK,code=1)
         draw_arrow(screen, centerx+5, centery-120, 320, 150, YELLOW, "Play New Game", pygame.font.Font("PlayfairDisplay-VariableFont_wght.ttf", 30), text_BLACK)

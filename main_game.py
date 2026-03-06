@@ -10,6 +10,7 @@ import config
 import solver
 n = 5
 pygame.font.init()
+#important optional parameters used for when the game is summoned from history
 def main(new_board=None,begin_time=None,begin_moves=0,record_id=None):
     WIDTH = 1280
     HEIGHT = 720
@@ -40,6 +41,7 @@ def main(new_board=None,begin_time=None,begin_moves=0,record_id=None):
     history_db = Database("History","history.db")
     leaderboard_db = Database("Leaderboard","leaderboard.db")
     leaderboard_data = leaderboard_db.fetch_data()
+    #important variables
     running = True
     solved = False
     game_end = False
@@ -62,9 +64,11 @@ def main(new_board=None,begin_time=None,begin_moves=0,record_id=None):
     pause_start = 0.0
     record_num = record_id
     cool_timer_variable = 0.0
+    #accepted key inputs
     allowed_keys = [pygame.K_w,pygame.K_a,pygame.K_s,pygame.K_d,pygame.K_UP,pygame.K_LEFT,pygame.K_DOWN,pygame.K_RIGHT]
     font = pygame.font.Font("puzzle/CrimsonPro-VariableFont_wght.ttf", 36)
     solved_text = font.render("PUZZLE SOLVED!", True, GREEN)
+    #load json data for saving
     with open("stats.json","r") as file:
         json_data = json.load(file)
     save_json = False
@@ -101,12 +105,15 @@ def main(new_board=None,begin_time=None,begin_moves=0,record_id=None):
         #convert a time string in H:MM:SS.sss format to seconds
         parts = time_str.split(":")
         if len(parts) == 2:
+            #minutes and seconds
             minutes, seconds = parts
             return int(minutes) * 60 + float(seconds)
         elif len(parts) == 3:
+            #hours minutes and seconds
             hours, minutes, seconds = parts
             return int(hours) * 3600 + int(minutes) * 60 + float(seconds)
         else:
+            #only seconds
             return float(parts[0])
 
     def confirmation_screen():
@@ -142,6 +149,7 @@ def main(new_board=None,begin_time=None,begin_moves=0,record_id=None):
         clock.tick(FPS)
         pygame.display.set_caption("Sliding Puzzle Game")
         if show_confirm:
+            #call the confirmation screen
             try:
                 if not game_end: buttons["pause"].text = "Resume"
                 elif time_elapsed != 0: buttons["pause"].text = "Resume"
@@ -152,10 +160,12 @@ def main(new_board=None,begin_time=None,begin_moves=0,record_id=None):
         pygame.display.flip()
 
         for event in pygame.event.get():
+            #full event handling
             swapped = False
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN and not show_confirm:
+                #handle ONLY left click and handle it ONLY if the game hasn't ended (post game handling is later)
                 if event.button == 1 and not game_end:
                     #board clicks
                     if not paused and board.handle_click(pygame.mouse.get_pos(), game_end):
@@ -169,6 +179,7 @@ def main(new_board=None,begin_time=None,begin_moves=0,record_id=None):
                             buttons["pause"].text = "Pause"
 
                     if buttons["solve"].handle_click(pygame.mouse.get_pos()):
+                        #call the solver screen IF and ONLY IF 3<=board size<=5
                         if board.n <=5:
                             solver.board = board
                             solver.main()
@@ -180,9 +191,11 @@ def main(new_board=None,begin_time=None,begin_moves=0,record_id=None):
                             
 
                     if buttons["quit"].handle_click(pygame.mouse.get_pos()):
+                        #pause and call the confirmation screen
                         paused = True
                         show_confirm = True
                 elif event.button == 1 and game_end:
+                    #post game handling
                     if buttons["pause"].handle_click(pygame.mouse.get_pos()):
                         print("Game already ended, nothing to pause.")
 
@@ -195,9 +208,11 @@ def main(new_board=None,begin_time=None,begin_moves=0,record_id=None):
                         save_record = True
 
                     if buttons["quit"].handle_click(pygame.mouse.get_pos()):
+                        #just call confirmation screen
                         show_confirm = True
 
             elif event.type == pygame.MOUSEBUTTONDOWN and show_confirm:
+                #confirmation screen button handling
                 if event.button == 1:
                     if quit_button.handle_click(pygame.mouse.get_pos()):
                         running = False
@@ -211,6 +226,7 @@ def main(new_board=None,begin_time=None,begin_moves=0,record_id=None):
 
 
             elif event.type == pygame.KEYDOWN:
+                #only handle keypress ONLY if the keys are in allowed_keys
                 if event.key not in allowed_keys:
                     pass
                 else:
@@ -225,32 +241,36 @@ def main(new_board=None,begin_time=None,begin_moves=0,record_id=None):
                     game_started = True
                 moves += 1
                 if board.is_solved():
+                    #everything to do with the end of the game
                     solved = True
                     end_time = time.time()
                     game_end = True
                     final_time_text = font.render(f"Final Time: {format_time(elapsed_time)}", True, GREEN)
                     final_time = elapsed_time
 
-            # Save the current board to the History database when requested
+            #save the current board to the History database when requested
             if save_board:
                 if board.n != 2:
                     record_solved = True if game_end else False
                     if record_num is None:
+                        #updates history database
                         current_datetime = datetime.now().isoformat() #returns the current time in YYYY-MM-DDTHH:MM:SS.ssssss
                         history_db.update_db(board.board,board.n,elapsed_time,moves,record_solved,current_datetime)
                         history_db.reduce_to_5()
                         record_num = history_db.lastrowid
                     else:
+                        #append new record and drop the old one
                         history_db.update_db(board.board,board.n,elapsed_time,moves,record_solved)
                         history_db.drop_record(record_num)
                 else:
                     print("Board size too small to save!")
                 save_board = False
             
-
+            #if we are updating an already existing record
             if save_record:
                 if board.n != 2:
                     if game_end:
+                        #firstly update the leaderboard database
                         for i in range(len(leaderboard_data)):
                             if int(leaderboard_data[i][-1]) == int(board.n):
                                 try:
@@ -260,6 +280,7 @@ def main(new_board=None,begin_time=None,begin_moves=0,record_id=None):
                                         #if the existing record is invalid or missing, just update with the new time without comparing
                                         leaderboard_db.update_record(None,None,board.n,final_time,None)
                                 break
+                    #next update the history database if necessary
                     current_datetime = datetime.now().isoformat()
                     record_solved = game_end
                     if game_end:
@@ -291,10 +312,10 @@ def main(new_board=None,begin_time=None,begin_moves=0,record_id=None):
                     print("Q was held for 3 seconds! Quitting game...")
                     pygame.quit()
         screen.fill(background)
-        # Update elapsed time
+        #update elapsed time
         if game_started and not paused:
             elapsed_time += clock.get_time()/1000
-
+        #background rects
         box_rect = pygame.Rect(690,60,550,600)
         box_border = pygame.Rect(688,58,554,604)
         pygame.draw.rect(screen,WHITE,box_border)
@@ -327,6 +348,7 @@ def main(new_board=None,begin_time=None,begin_moves=0,record_id=None):
             screen.blit(r_text, (700,190))
             keys = pygame.key.get_pressed()
             if keys[pygame.K_r]:
+                #everything to do with starting a new game
                 board.generate_solvable()
                 solved = False
                 moves = 0

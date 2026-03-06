@@ -34,9 +34,11 @@ def main():
     rect = pygame.rect.Rect(60,60,1160,600)
     border = pygame.rect.Rect(59,59,1162,602)
     clock = pygame.time.Clock()
+    #helper for drawing rects
     left,top = 700,71
     spacing = 120
     dates = []
+    #helper for deciding which Continue buttons are loaded
     button_drawn = [False,False,False,False,False]
     history_db = Database("History","history.db")
     data = history_db.fetch_data()
@@ -44,6 +46,7 @@ def main():
     pygame.draw.line(arrow_surface, WHITE, (20, 100), (120, 100), 10)
     head_points = [(140, 100), (110, 80), (110, 120)]
     pygame.draw.polygon(arrow_surface, WHITE, head_points)
+    #helper variables
     count = 0
     avg_time = 0
     total_time = 0
@@ -80,10 +83,13 @@ def main():
         secs = seconds % 60
 
         if hours > 0:
+            #hours minutes and seconds
             return f"{hours:d}:{minutes:02d}:{secs:06.3f}"
         elif minutes > 0:
+            #minutes and seconds
             return f"{minutes:02d}:{secs:06.3f}"
         else:
+            #only seconds
             return f"{secs:06.3f}"
 
 
@@ -98,7 +104,7 @@ def main():
         if dates == []: return int(0)
         most_recent = max(dates)
         return dates.index(most_recent)
-
+    #load stats for displaying
     with open("stats.json","r") as file:
         json_data = json.load(file)
     
@@ -114,7 +120,7 @@ def main():
                 total_moves += int(data[i][3])
         except:
             pass  #ignore bad or incomplete entries in history
-
+    #the five buttons to be drawn ONLY if necessary
     buttons_list = [Button(left+290,(top+(120*0)+5)+5,200,80,"Continue game",GREEN, border_radius=12),
                     Button(left+290,(top+(120*1)+5)+5,200,80,"Continue game",GREEN, border_radius=12),
                     Button(left+290,(top+(120*2)+5)+5,200,80,"Continue game",GREEN, border_radius=12),
@@ -141,14 +147,18 @@ def main():
         clock.tick(FPS)
         pygame.display.flip()
         for event in pygame.event.get():
+            #main event handling
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if main_menu_button.handle_click(pygame.mouse.get_pos()):
-                    running = False
-                for i in range(5):
-                    if buttons_list[i].handle_click(pygame.mouse.get_pos()) and button_drawn[i]:
-                        game_to_load = i
+                #handle ONLY left click
+                if event.button==1:
+                    if main_menu_button.handle_click(pygame.mouse.get_pos()):
+                        running = False
+                    for i in range(5):
+                        #decide on which game to load based on which button was pressed
+                        if buttons_list[i].handle_click(pygame.mouse.get_pos()) and button_drawn[i]:
+                            game_to_load = i
         screen.fill(background)
         pygame.display.set_caption("History")
         pygame.draw.rect(screen,WHITE,border)
@@ -167,6 +177,7 @@ def main():
                 int(data[i][1])
             except:
                 continue #ignore invalid or missing rows
+            #create and draw rects and board visualisations alongside relevant data
             new_rect = pygame.rect.Rect(left,top+(120*i),500,100)
             new_border = pygame.rect.Rect(left-2,top+(120*i)-2,504,104)
             pygame.draw.rect(screen,WHITE,new_border)
@@ -196,6 +207,7 @@ def main():
                 continue_button = buttons_list[i]
                 continue_button.create_button(screen,20,WHITE)
                 button_drawn[i] = True
+        #drawing text and most recent save arrow
         screen.blit(amount_solved_text,(150,150))
         screen.blit(avg_moves_text,(150,200))
         screen.blit(avg_time_text,(150,250))

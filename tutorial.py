@@ -8,7 +8,7 @@ def main():
     WIDTH = 1280
     HEIGHT = 720
     FPS = 60
-    # setting the theme colours
+    #theme colours
     all_colours = config.get_all_colours()
     text_BLACK = (0,0,0)
     text_WHITE = (255,255,255)
@@ -26,8 +26,10 @@ def main():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Tutorial Menu")
     clock = pygame.time.Clock()
+    #background rects
     rect = pygame.rect.Rect(60,60,1160,600)
     border = pygame.rect.Rect(59,59,1162,602)
+    #main buttons creation
     main_game_button = Button(200,HEIGHT//2-150,200,80,"Main Game Tutorial",GREEN,border_radius=12)
     history_button = Button(200,HEIGHT//2-50,200,80,"History Tutorial",GREEN,border_radius=12)
     leaderboard_button = Button(840,HEIGHT//2-150,200,80,"Leaderboard",NAVY,border_radius=12)
@@ -46,25 +48,29 @@ def main():
         clock.tick(FPS)
         pygame.display.flip()
         for event in pygame.event.get():
+            #main event handling
             if event.type == pygame.QUIT:
                 running = False
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if main_game_button.handle_click(pygame.mouse.get_pos()):
-                    main_game_tutorial.main()
-                elif history_button.handle_click(pygame.mouse.get_pos()):
-                    history_tutorial.main()
-                elif leaderboard_button.handle_click(pygame.mouse.get_pos()):
-                    leaderboard_tutorial.main()
-                elif history_database_button.handle_click(pygame.mouse.get_pos()):
-                    history_database_tutorial.main()
-                elif solver_button.handle_click(pygame.mouse.get_pos()):
-                    solver_tutorial.main()
-                elif solve_it_button.handle_click(pygame.mouse.get_pos()):
-                    solve_it_tutorial.main()
-                elif main_menu_button.handle_click(pygame.mouse.get_pos()):
-                    running = False
-
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                #handle ONLY left click
+                if event.button==1:
+                    #call the respective tutorial explanation screens if the button is clicked
+                    if main_game_button.handle_click(pygame.mouse.get_pos()):
+                        main_game_tutorial.main()
+                    elif history_button.handle_click(pygame.mouse.get_pos()):
+                        history_tutorial.main()
+                    elif leaderboard_button.handle_click(pygame.mouse.get_pos()):
+                        leaderboard_tutorial.main()
+                    elif history_database_button.handle_click(pygame.mouse.get_pos()):
+                        history_database_tutorial.main()
+                    elif solver_button.handle_click(pygame.mouse.get_pos()):
+                        solver_tutorial.main()
+                    elif solve_it_button.handle_click(pygame.mouse.get_pos()):
+                        solve_it_tutorial.main()
+                    elif main_menu_button.handle_click(pygame.mouse.get_pos()):
+                        running = False
         screen.fill(background)
+        #drawing text and buttons
         pygame.draw.rect(screen,WHITE,border)
         pygame.draw.rect(screen,box_colour,rect)
         draw_text("Select which tutorial you would like to view:",font,WHITE,screen,WIDTH//2,110)
